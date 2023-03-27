@@ -1,5 +1,5 @@
 const db = require("../../models/index");
-const Admin = db.models.Admin;
+const Admin = {};
 const bcrypt = require("bcryptjs");
 const xssFilter = require("xss-filters");
 const jwt = require("jsonwebtoken");
