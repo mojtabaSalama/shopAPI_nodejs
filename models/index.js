@@ -16,18 +16,19 @@ const sequelize = new Sequelize(
 let db = {};
 db.sequelize = sequelize;
 db.models = {};
-//require the objects
-let Admin = require("./admin")(sequelize, Sequelize.DataTypes);
 
-//sql relationship here -------------------------------
+// //require the objects
+// let Admin = require("./admin")(sequelize, Sequelize.DataTypes);
 
-//checkout and employee
-Employee.hasMany(Checkout);
-Checkout.belongsTo(Employee);
+// //sql relationship here -------------------------------
 
-//-----------------------------------------------------
+// //checkout and employee
+// Employee.hasMany(Checkout);
+// Checkout.belongsTo(Employee);
 
-//add to db models
-db.models.Admin = Admin;
+// //-----------------------------------------------------
+
+// //add to db models
+// db.models.Admin = Admin;
 
 module.exports = db;
