@@ -8,19 +8,36 @@ require("dotenv").config();
 const user = {
   signup: async (req, res) => {
     try {
-      let { name, phoneNum, email, password, level, deviceId, mobile_model } =
-        req.body;
+      let {
+        name,
+        phoneNum,
+        email,
+        password,
+        level,
+        deviceId,
+        mobile_model,
+        schoolId,
+      } = req.body;
 
       //check req.body
       if (
-        !(name && phoneNum && password && level && deviceId && mobile_model)
+        !(
+          name &&
+          phoneNum &&
+          password &&
+          level &&
+          deviceId &&
+          mobile_model &&
+          schoolId
+        )
       ) {
-        return res.status(400).json({ msg: "قم بادخال جميع الحقول" });
+        return res.status(204).json({ msg: "قم بادخال جميع الحقول" });
       }
 
       //check requirements
       console.log(phoneNum.length);
       if (phoneNum.length !== 10) return res.status(400).json("wrong phone");
+
       if (password.length < 8)
         return res.status(400).json("pssword 8 charachters");
 
@@ -36,8 +53,8 @@ const user = {
       });
 
       //make sure no admin is replicated
-      let student = await Student.findOne({ where: { name } });
-      if (student) return res.status(400).json("student already exist");
+      let student = await Student.findOne({ where: { phoneNum } });
+      if (student) return res.status(403).json("student already exist");
 
       //hash user password
       const salt = await bcrypt.genSalt(10);
@@ -58,6 +75,7 @@ const user = {
         acc_numbers,
         password: hashedPassword,
         new_update: true,
+        schoolId,
       });
 
       //send to client
@@ -71,6 +89,7 @@ const user = {
           level: newStudent.level,
           acc_numbers: newStudent.acc_numbers,
           deviceId: newStudent.deviceId,
+          schoolId: newStudent.schoolId,
         },
       });
     } catch (error) {
@@ -79,22 +98,23 @@ const user = {
   },
   login: async (req, res) => {
     try {
-      let { name, password, deviceId } = req.body;
+      let { phoneNum, password, deviceId } = req.body;
 
-      if (!name || !password || !deviceId) {
+      if (!phoneNum || !password || !deviceId) {
         return res.status(400).json({ msg: "قم بادخال جميع الحقول" });
       }
 
       //filter input
-      (name = xssFilter.inHTMLData(name)),
+      (phoneNum = xssFilter.inHTMLData(phoneNum)),
         (password = xssFilter.inHTMLData(password));
       deviceId = xssFilter.inHTMLData(deviceId);
 
-      Student.findOne({ where: { name } }).then((user) => {
+      Student.findOne({ where: { phoneNum } }).then((user) => {
         if (!user) {
           return res.status(400).json({ msg: "المستخدم غير موجود !" });
         }
-        if (user.status !== true) return res.status(400).json("not verified");
+        // if (user.status !== true) return res.status(400).json("not verified");
+
         //deviceId
         if (deviceId !== user.deviceId) {
           if (user.allowed_devices === false) {

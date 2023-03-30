@@ -5,7 +5,7 @@ const validUser = (req, res, next) => {
   let token = req.header("x-auth-token");
 
   if (!token) {
-    return res.status(401).json({ msg: "Not Authorized , Please Login in" });
+    return res.status(401).json({ msg: "Not Authorized , Please Login in " });
   }
 
   try {
