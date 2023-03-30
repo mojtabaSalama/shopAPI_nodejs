@@ -56,6 +56,10 @@ questions.belongsTo(chapter);
 questions.hasMany(answer);
 answer.belongsTo(questions);
 
+//quiz and resul
+quiz.hasMany(result);
+result.belongsTo(quiz);
+
 // //-----------------------------------------------------
 
 // //add to db models

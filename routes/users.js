@@ -1,14 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const user = require("../controllers/users/userController");
+const student = require("../controllers/users/studentController");
+const validUser = require("../middlewares/auth");
 
-router.post("/secured/hidden/432651/register_new_admin", user.signup);
+router.post("/signup", student.signup);
 
-router.post("/login", user.login);
+router.post("/login", student.login);
 
-router.get("/get-user", user.getbyid);
-
-router.post("/delete-user", user.delete);
-//reset password here
+router.get("/get-user", validUser, student.getbyid);
 
 module.exports = router;

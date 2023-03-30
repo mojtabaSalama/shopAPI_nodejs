@@ -4,8 +4,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       id: {
         type: DataTypes.UUID,
-        defaultValue: sequelize.UUIDV4,
         primaryKey: true,
+        defaultValue: DataTypes.UUIDV1,
       },
       name: {
         type: DataTypes.STRING,
@@ -24,11 +24,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       level: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        type: DataTypes.JSON(),
+        defaultValue: [],
       },
       deviceId: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       mobile_model: {
@@ -39,9 +39,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
-      new_update: {
+      allowed_devices: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
+      },
+      new_update: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
       },
       acc_numbers: {
         type: DataTypes.INTEGER,

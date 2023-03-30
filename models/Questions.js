@@ -4,8 +4,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       id: {
         type: DataTypes.UUID,
-        defaultValue: sequelize.UUIDV4,
         primaryKey: true,
+        defaultValue: DataTypes.UUIDV1,
       },
       q_text: {
         type: DataTypes.STRING,
@@ -17,10 +17,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       q_image: {
         type: DataTypes.STRING,
-        allowNull: false,
       },
       defficulty: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM("easy", "medium", "hard"),
         allowNull: false,
       },
       type: {
