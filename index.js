@@ -17,6 +17,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
 
+//main page
+app.get("/", (req, res) => {
+  res.send("api is Working");
+});
+
 //setting up routes
 app.use("/student", require("./routes/users"));
 
