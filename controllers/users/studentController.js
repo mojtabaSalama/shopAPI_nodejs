@@ -1,5 +1,7 @@
 const db = require("../../models/index");
 const Student = db.models.student;
+const Quiz = db.models.quiz;
+
 const bcrypt = require("bcryptjs");
 const xssFilter = require("xss-filters");
 const jwt = require("jsonwebtoken");
@@ -56,7 +58,15 @@ const user = {
       //-------------------------------------
 
       //filter list
-      let data = [name, phoneNum, email, password, deviceId, mobile_model];
+      let data = [
+        name,
+        phoneNum,
+        email,
+        password,
+        deviceId,
+        mobile_model,
+        schoolId,
+      ];
       //filtered data
       data.map((data) => {
         data = xssFilter.inHTMLData(data);
@@ -91,6 +101,7 @@ const user = {
         acc_numbers,
         password: hashedPassword,
         new_update: true,
+        schoolId,
       });
 
       //send to client
@@ -153,6 +164,24 @@ const user = {
           } else {
             //sign user
             let token = await jwt.sign({ id: user.id }, process.env.JWTSECRET);
+
+            //find user offline quizes
+            let offlineExams = [];
+            if (user.new_update) {
+              offlineExams = await Quiz.findAll({
+                where: { category: "offline" },
+              });
+            }
+            //find user online exams
+            let onlineExams = await Quiz.findAll({
+              where: { category: "online", schoolId: user.schoolId },
+            });
+
+            //change the user update statements
+            user.new_update = false;
+            await user.save();
+
+            //send response
             res.json({
               token,
               user: {
@@ -165,7 +194,10 @@ const user = {
                 acc_numbers: user.acc_numbers,
                 deviceId: user.deviceId,
                 isUpdate: user.new_update,
+                schoolId: user.schoolId,
               },
+              offlineExams,
+              onlineExams,
             });
           }
         });
@@ -193,9 +225,9 @@ const user = {
   },
   update: async (req, res) => {
     try {
-      const { name, email, password, studentId } = req.body;
+      const { name, password, schoolId, level, studentId } = req.body;
 
-      if (!(name && email && password && studentId))
+      if (!(name && schoolId && password && level && studentId))
         return res.status(400).json("enter all feilds");
 
       //hash user password
@@ -204,7 +236,7 @@ const user = {
 
       //update User
       let status = await Student.update(
-        { name, email, password: hashedPassword },
+        { name, password: hashedPassword, schoolId, level },
         { where: { id: studentId } }
       );
       res.send(`updated user successfully ${status}`);
@@ -244,6 +276,46 @@ const user = {
         await user.save();
         res.json({ user });
       }
+    } catch (error) {
+      if (error) throw error;
+    }
+  },
+  updatePhone: async (req, res) => {
+    try {
+      const { phoneNum, studentId } = req.body;
+
+      if (!phoneNum || !studentId)
+        return res.status(400).json("enter all feilds");
+
+      //---------------------------
+
+      //VERIFY PHONE WITH TWILIO
+
+      //-------------------------
+
+      //update User
+      let status = await Student.update(
+        { phoneNum },
+        { where: { id: studentId } }
+      );
+      res.send(`updated user successfully ${status}`);
+    } catch (error) {
+      if (error) throw error;
+    }
+  },
+  updateEmail: async (req, res) => {
+    try {
+      const { email, studentId } = req.body;
+
+      if (!(email && studentId))
+        return res.status(400).json("enter all feilds");
+
+      //update User
+      let status = await Student.update(
+        { email },
+        { where: { id: studentId } }
+      );
+      res.send(`updated user successfully ${status}`);
     } catch (error) {
       if (error) throw error;
     }
