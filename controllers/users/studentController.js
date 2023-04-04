@@ -3,6 +3,8 @@ const Student = db.models.student;
 const bcrypt = require("bcryptjs");
 const xssFilter = require("xss-filters");
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
+const path = require("path");
 require("dotenv").config();
 
 const user = {
@@ -188,6 +190,63 @@ const user = {
         });
       })
       .catch((err) => console.log(err));
+  },
+  update: async (req, res) => {
+    try {
+      const { name, email, password, studentId } = req.body;
+
+      if (!(name && email && password && studentId))
+        return res.status(400).json("enter all feilds");
+
+      //hash user password
+      const salt = await bcrypt.genSalt(10);
+      hashedPassword = await bcrypt.hash(password, salt);
+
+      //update User
+      let status = await Student.update(
+        { name, email, password: hashedPassword },
+        { where: { id: studentId } }
+      );
+      res.send(`updated user successfully ${status}`);
+    } catch (error) {
+      if (error) throw error;
+    }
+  },
+  updateImage: async (req, res) => {
+    try {
+      let { filename } = req.file;
+      let { studentId } = req.body;
+
+      //check request
+      if (!studentId) return res.status(400).json("add employee id");
+
+      //check user
+      const user = await Student.findOne({ where: { id: studentId } });
+
+      //check if user already has an image
+      let filePath = path.join(
+        __dirname,
+        `../../public/images/${user.ImgLink}`
+      );
+      console.log(fs.existsSync(filePath));
+      if (fs.existsSync(filePath)) {
+        //delete from fs system
+        fs.unlink(filePath, (err) => {
+          if (err) console.log(err);
+          console.log("deleted from fs successfully");
+        });
+        //save the new link
+        user.ImgLink = filename;
+        await user.save();
+        res.json({ user });
+      } else {
+        user.ImgLink = filename;
+        await user.save();
+        res.json({ user });
+      }
+    } catch (error) {
+      if (error) throw error;
+    }
   },
 };
 

@@ -36,6 +36,9 @@ quiz.belongsTo(school);
 // school and studen
 school.hasMany(student);
 student.belongsTo(school);
+// school and subjects
+school.hasMany(subjects);
+subjects.belongsTo(school);
 
 // student and quiz
 student.hasMany(quiz);
@@ -56,6 +59,9 @@ questions.belongsTo(chapter);
 questions.hasMany(answer);
 answer.belongsTo(questions);
 
+//quiz and questions
+quiz.hasMany(questions);
+questions.belongsTo(quiz);
 //quiz and resul
 quiz.hasMany(result);
 result.belongsTo(quiz);
