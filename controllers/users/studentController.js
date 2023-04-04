@@ -249,6 +249,20 @@ const user = {
       let { filename } = req.file;
       let { studentId } = req.body;
 
+      // check if file is an image
+      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        fs.unlink(
+          path.join(__dirname, `../../public/images/${filename}`),
+          (err) => {
+            if (err) throw err;
+            console.log("deleted type is not image");
+          }
+        );
+        return res.status(400).json("File is not an image");
+      }
+
       //check request
       if (!studentId) return res.status(400).json("add employee id");
 
@@ -260,7 +274,7 @@ const user = {
         __dirname,
         `../../public/images/${user.ImgLink}`
       );
-      console.log(fs.existsSync(filePath));
+
       if (fs.existsSync(filePath)) {
         //delete from fs system
         fs.unlink(filePath, (err) => {

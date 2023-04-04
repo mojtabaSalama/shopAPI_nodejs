@@ -33,12 +33,15 @@ let admin = require("./Admin")(sequelize, Sequelize.DataTypes);
 // school and quiz
 school.hasMany(quiz);
 quiz.belongsTo(school);
-// school and studen
+// school and student
 school.hasMany(student);
 student.belongsTo(school);
 // school and subjects
 school.hasMany(subjects);
 subjects.belongsTo(school);
+//school and result
+school.hasMany(result);
+result.belongsTo(school);
 
 // student and quiz
 student.hasMany(quiz);
