@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express();
+const router = express.Router();
+
 const path = require("path");
 const cors = require("cors");
 const db = require("../models/index");
@@ -27,10 +29,8 @@ app.get("/", (req, res) => {
 app.use("/student", require("../routes/users"));
 app.use("/exam", require("../routes/exams"));
 
-// path must route to lambda
-app.use("/.netlify/functions/server", require("../routes/users"));
-// path must route to lambda
-app.use("/.netlify/functions/server", require("../routes/exams"));
+// must route to lambda
+app.use("/.netlify/functions/server", router);
 
 module.exports = app;
 module.exports.handler = serverless(app);
