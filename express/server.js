@@ -30,7 +30,7 @@ app.use("/student", require("../routes/users"));
 app.use("/exam", require("../routes/exams"));
 
 // must route to lambda
-app.use("/.netlify/functions/server", router);
+app.use("/", router);
 
 module.exports = app;
 module.exports.handler = serverless(app);
