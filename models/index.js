@@ -1,5 +1,6 @@
 require("dotenv").config();
 const Sequelize = require("sequelize");
+const pgHstore = require("pg-hstore");
 
 //connecting to mysql
 const sequelize = new Sequelize(
