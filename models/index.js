@@ -18,68 +18,41 @@ db.sequelize = sequelize;
 db.models = {};
 
 //require the objects
-let student = require("./Student")(sequelize, Sequelize.DataTypes);
-let school = require("./School")(sequelize, Sequelize.DataTypes);
-let subjects = require("./Subject")(sequelize, Sequelize.DataTypes);
-let chapter = require("./Chapter")(sequelize, Sequelize.DataTypes);
-let quiz = require("./Quiz")(sequelize, Sequelize.DataTypes);
-let questions = require("./Questions")(sequelize, Sequelize.DataTypes);
-let answer = require("./Answers")(sequelize, Sequelize.DataTypes);
-let result = require("./Result")(sequelize, Sequelize.DataTypes);
+let user = require("./User")(sequelize, Sequelize.DataTypes);
+let admin_country = require("./admin_country")(sequelize, Sequelize.DataTypes);
+let product_category = require("./product_category")(
+  sequelize,
+  Sequelize.DataTypes
+);
+let order = require("./order")(sequelize, Sequelize.DataTypes);
+let product = require("./product")(sequelize, Sequelize.DataTypes);
 let admin = require("./Admin")(sequelize, Sequelize.DataTypes);
 
 // //sql relationship here -------------------------------
 
-// school and quiz
-school.hasMany(quiz);
-quiz.belongsTo(school);
-// school and student
-school.hasMany(student);
-student.belongsTo(school);
-// school and subjects
-school.hasMany(subjects);
-subjects.belongsTo(school);
-//school and result
-school.hasMany(result);
-result.belongsTo(school);
+// admin and ADMIN COUNTRY
 
-// student and quiz
-student.hasMany(quiz);
-quiz.belongsTo(student);
-// student and result
-student.hasMany(result);
-result.belongsTo(student);
+admin.hasOne(admin_country);
+admin_country.hasMany(admin);
+//admin who created the product
+product.belongsTo(admin);
 
-//subject and chapters
-subjects.hasMany(chapter);
-chapter.belongsTo(subjects);
-
-//chapters and quiz
-chapter.hasMany(questions);
-questions.belongsTo(chapter);
-
-//questions and answers
-questions.hasMany(answer);
-answer.belongsTo(questions);
-
-//quiz and questions
-quiz.hasMany(questions);
-questions.belongsTo(quiz);
-//quiz and resul
-quiz.hasMany(result);
-result.belongsTo(quiz);
+// product and category
+product_category.belongsTo(product);
+product_category.hasMany(product);
+// user and order
+user.hasMany(order);
+// order and product
+order.belongsTo(product);
 
 // //-----------------------------------------------------
 
 // //add to db models
-db.models.student = student;
-db.models.school = school;
-db.models.subjects = subjects;
-db.models.chapter = chapter;
-db.models.quiz = quiz;
-db.models.questions = questions;
-db.models.answer = answer;
-db.models.result = result;
+db.models.user = user;
+db.models.product = product;
+db.models.product_category = product_category;
+db.models.order = order;
+db.models.admin_country = admin_country;
 db.models.admin = admin;
 
 module.exports = db;

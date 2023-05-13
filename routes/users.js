@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const student = require("../controllers/users/studentController");
+const user = require("../controllers/users/userController");
 const validUser = require("../middlewares/auth");
 const multer = require("multer");
 
@@ -15,19 +15,15 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 //routes -------------------
-router.post("/signup", student.signup);
+router.post("/signup", user.signup);
 
-router.post("/login", student.login);
+router.post("/login", user.login);
 
-router.post("/update", student.update);
+router.post("/update", user.update);
 
-router.post("/update-email", student.updateEmail);
+router.post("/update-image", upload.single("file"), user.updateImage);
 
-router.post("/update-phone", student.updatePhone);
-
-router.post("/update-image", upload.single("file"), student.updateImage);
-
-router.get("/get-user", validUser, student.getbyid);
+router.get("/get-user", validUser, user.getbyid);
 //---------------------------
 
 module.exports = router;
