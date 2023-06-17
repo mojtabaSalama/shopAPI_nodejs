@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
 
       status: {
         type: DataTypes.BOOLEAN, //0 means not accepted 1 accepted
-        defaultValue: true,
+        defaultValue: false,
       },
     },
     {

@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       name: {
         type: DataTypes.STRING,
-        defaultValue: false,
+        allowNull: false,
       },
       price: {
         type: DataTypes.INTEGER,
@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       ImgLink: {
         type: DataTypes.STRING,
-        defaultValue: false,
+        allowNull: true,
       },
     },
     {

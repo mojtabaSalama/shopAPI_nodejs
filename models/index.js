@@ -38,7 +38,7 @@ admin_country.hasMany(admin);
 product.belongsTo(admin);
 
 // product and category
-product_category.belongsTo(product);
+// product_category.belongsTo(product);
 product_category.hasMany(product);
 // user and order
 user.hasMany(order);
