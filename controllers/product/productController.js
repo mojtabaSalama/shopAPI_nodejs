@@ -68,7 +68,7 @@ const product = {
   },
   updateImage: async (req, res) => {
     try {
-      let { filename } = req.file;
+      let { file } = req.file;
       let { product_id } = req.body;
 
       // check if file is an image]
@@ -76,7 +76,7 @@ const product = {
 
       if (!allowedTypes.includes(req.file.mimetype)) {
         fs.unlink(
-          path.join(__dirname, `../../public/images/${filename}`),
+          path.join(__dirname, `../../public/images/${file}`),
           (err) => {
             if (err) throw err;
             console.log("deleted type is not image");
@@ -86,15 +86,15 @@ const product = {
       }
 
       //check request
-      if (!product_id) return res.status(400).json("add employee id");
+      if (!product_id) return res.status(400).json("add product id");
 
       //check user
-      const prodect = await Product.findOne({ where: { id: product_id } });
+      const product = await Product.findOne({ where: { id: product_id } });
 
       //check if user already has an image
       let filePath = path.join(
         __dirname,
-        `../../public/images/${prodect.ImgLink}`
+        `../../public/images/${product.ImgLink}`
       );
 
       if (fs.existsSync(filePath)) {
@@ -104,13 +104,13 @@ const product = {
           console.log("deleted from fs successfully");
         });
         //save the new link
-        prodect.ImgLink = filename;
-        await prodect.save();
-        res.json({ user });
+        product.ImgLink = file;
+        await product.save();
+        res.json({ product });
       } else {
-        prodect.ImgLink = filename;
-        await user.save();
-        res.json({ prodect });
+        product.ImgLink = file;
+        await product.save();
+        res.json({ product });
       }
     } catch (error) {
       if (error) throw error;
