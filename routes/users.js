@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const user = require("../controllers/users/userController");
-const validUser = require("../middlewares/auth");
+const validUser = require("../middlewares/auth/userAuth");
 const multer = require("multer");
 
 const storage = multer.diskStorage({
@@ -19,11 +19,16 @@ router.post("/signup", user.signup);
 
 router.post("/login", user.login);
 
-router.post("/update", user.update);
+router.post("/update", validUser, user.update);
 
-router.post("/update-image", upload.single("file"), user.updateImage);
+router.post(
+  "/update-image",
+  validUser,
+  upload.single("file"),
+  user.updateImage
+);
 
-router.get("/get-user", validUser, user.getbyid);
+router.get("/get-user", validUser, user.getbyid); //think about it
 //---------------------------
 
 module.exports = router;

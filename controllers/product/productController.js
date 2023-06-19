@@ -10,17 +10,17 @@ const xssFilter = require("xss-filters");
 const product = {
   create: async (req, res) => {
     try {
-      // let { filename } = req.file;
+      let { filename } = req.file;
       let { price, name, productCategoryId } = req.body;
 
       // console.log(req.file);
       //check req.body
-      if (!(price && name && productCategoryId)) {
+      if (!(price && name && productCategoryId && filename)) {
         return res.status(400).json({ msg: " please enter all fields" });
       }
 
       //filter list
-      let data = [price, name, productCategoryId];
+      let data = [price, name, productCategoryId, filename];
       //filtered data
       data.map((data) => {
         data = xssFilter.inHTMLData(data);
@@ -30,24 +30,24 @@ const product = {
       let product = await Product.findOne({ where: { name } });
       if (product) return res.status(403).json("The product is already exist");
 
-      // // check if file is an image
-      // const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+      // check if file is an image
+      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
 
-      // if (!allowedTypes.includes(req.file.mimetype)) {
-      //   fs.unlink(
-      //     path.join(__dirname, `../../public/images/${filename}`),
-      //     (err) => {
-      //       if (err) throw err;
-      //       console.log("deleted type is not image");
-      //     }
-      //   );
-      //   return res.status(400).json("File is not an image");
-      // }
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        fs.unlink(
+          path.join(__dirname, `../../public/images/${filename}`),
+          (err) => {
+            if (err) throw err;
+            console.log("deleted type is not image");
+          }
+        );
+        return res.status(400).json("File is not an image");
+      }
 
       //save to database
       const newProduct = await Product.create({
         name,
-        // ImgLink: filename,
+        ImgLink: filename,
         price,
         productCategoryId,
       });
@@ -58,7 +58,7 @@ const product = {
           id: newProduct.id,
           name: newProduct.name,
           price: newProduct.price,
-          filename: newProduct.ImgLink,
+          Image: newProduct.ImgLink,
           productCategoryId: newProduct.productCategoryId,
         },
       });
@@ -68,15 +68,16 @@ const product = {
   },
   updateImage: async (req, res) => {
     try {
-      let { file } = req.file;
+      let { filename } = req.file;
       let { product_id } = req.body;
+      console.log(req.file);
 
       // check if file is an image]
       const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
 
       if (!allowedTypes.includes(req.file.mimetype)) {
         fs.unlink(
-          path.join(__dirname, `../../public/images/${file}`),
+          path.join(__dirname, `../../public/images/${filename}`),
           (err) => {
             if (err) throw err;
             console.log("deleted type is not image");
@@ -90,6 +91,7 @@ const product = {
 
       //check user
       const product = await Product.findOne({ where: { id: product_id } });
+      console.log(product);
 
       //check if user already has an image
       let filePath = path.join(
@@ -104,17 +106,57 @@ const product = {
           console.log("deleted from fs successfully");
         });
         //save the new link
-        product.ImgLink = file;
+        product.ImgLink = filename;
         await product.save();
+        con;
         res.json({ product });
       } else {
-        product.ImgLink = file;
+        product.ImgLink = filename;
         await product.save();
         res.json({ product });
       }
     } catch (error) {
       if (error) throw error;
     }
+  },
+
+  updateProduct: async (req, res) => {
+    try {
+      const { name, price, productCategoryId, id } = req.body;
+
+      // if (!(name && price && productCategoryId && id))
+      //   return res.status(400).json("enter all feilds");
+
+      //update User
+      let status = await Product.update(
+        { name, price, productCategoryId },
+        { where: { id } }
+      );
+      res.send(`updated user successfully ${status}`);
+    } catch (error) {
+      if (error) throw error;
+    }
+  },
+  remove_admin: (req, res) => {
+    let { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ msg: "please enter admin id" });
+    }
+
+    data = xssFilter.inHTMLData(id);
+
+    console.log(id);
+    Product.destroy({ where: { id } })
+      .then((num) => {
+        if (num == 1) {
+          res.send({ message: "deleted successfully" });
+        } else {
+          res.send("can't delete");
+        }
+      })
+      .catch((err) => {
+        res.status(404).send({ message: err });
+      });
   },
   add_category: async (req, res) => {
     try {

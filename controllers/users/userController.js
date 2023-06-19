@@ -90,7 +90,10 @@ const user = {
             return res.status(400).json({ msg: "password is incorrect" });
           } else {
             //sign user
-            let token = await jwt.sign({ id: user.id }, process.env.JWTSECRET);
+            let token = await jwt.sign(
+              { id: user.id },
+              process.env.JWTSECRETUSER
+            );
 
             //send response
             res.json({
