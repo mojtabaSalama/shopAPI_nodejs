@@ -216,5 +216,45 @@ const admin = {
       console.log(error);
     }
   },
+  remove_country: (req, res) => {
+    let { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ msg: "please enter country id" });
+    }
+
+    data = xssFilter.inHTMLData(id);
+
+    Country.destroy({ where: { id } })
+      .then((num) => {
+        if (num == 1) {
+          res.send({ message: "deleted successfully" });
+        } else {
+          res.send("can't delete");
+        }
+      })
+      .catch((err) => {
+        res.status(404).send({ message: err });
+      });
+  },
+  remove_user: (req, res) => {
+    let { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ msg: "please enter user id" });
+    }
+
+    data = xssFilter.inHTMLData(id);
+
+    USER.destroy({ where: { id } })
+      .then((num) => {
+        if (num == 1) {
+          res.send({ message: "deleted successfully" });
+        } else {
+          res.send("can't delete");
+        }
+      })
+      .catch((err) => {
+        res.status(404).send({ message: err });
+      });
+  },
 };
 module.exports = admin;

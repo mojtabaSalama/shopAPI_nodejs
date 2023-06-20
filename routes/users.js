@@ -3,6 +3,7 @@ const router = express.Router();
 const user = require("../controllers/users/userController");
 const validUser = require("../middlewares/auth/userAuth");
 const multer = require("multer");
+const validAdmin = require("../middlewares/auth/adminAuth");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -28,7 +29,7 @@ router.post(
   user.updateImage
 );
 
-router.get("/get-user", validUser, user.getbyid); //think about it
+router.get("/get-user", validAdmin, user.getbyid); //think about it
 //---------------------------
 
 module.exports = router;

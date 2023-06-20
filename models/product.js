@@ -19,7 +19,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      amount: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
     },
+
     {
       freezTableName: true,
     }

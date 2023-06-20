@@ -11,6 +11,8 @@ router.post("/update", validAdmin, admin.update);
 router.post("/removAdmin", validAdmin, admin.remove_admin);
 router.get("/getAdmin", validAdmin, admin.getbyid);
 
-router.post("/country", admin.add_country);
+router.post("/country", validAdmin, admin.add_country);
+router.post("/remove_country", validAdmin, admin.remove_country);
 
+router.post("/remove_user", validAdmin, admin.remove_user);
 module.exports = router;

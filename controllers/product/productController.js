@@ -11,16 +11,16 @@ const product = {
   create: async (req, res) => {
     try {
       let { filename } = req.file;
-      let { price, name, productCategoryId } = req.body;
+      let { price, name, productCategoryId, amount } = req.body;
 
       // console.log(req.file);
       //check req.body
-      if (!(price && name && productCategoryId && filename)) {
+      if (!(price && name && productCategoryId && filename && amount)) {
         return res.status(400).json({ msg: " please enter all fields" });
       }
 
       //filter list
-      let data = [price, name, productCategoryId, filename];
+      let data = [price, name, productCategoryId, filename, amount];
       //filtered data
       data.map((data) => {
         data = xssFilter.inHTMLData(data);
@@ -50,6 +50,7 @@ const product = {
         ImgLink: filename,
         price,
         productCategoryId,
+        amount,
       });
 
       //send to client
@@ -60,6 +61,7 @@ const product = {
           price: newProduct.price,
           Image: newProduct.ImgLink,
           productCategoryId: newProduct.productCategoryId,
+          amount: newProduct.amount,
         },
       });
     } catch (error) {
@@ -122,14 +124,14 @@ const product = {
 
   updateProduct: async (req, res) => {
     try {
-      const { name, price, productCategoryId, id } = req.body;
+      const { name, price, productCategoryId, id, amount } = req.body;
 
       // if (!(name && price && productCategoryId && id))
       //   return res.status(400).json("enter all feilds");
 
       //update User
       let status = await Product.update(
-        { name, price, productCategoryId },
+        { name, price, productCategoryId, amount },
         { where: { id } }
       );
       res.send(`updated user successfully ${status}`);
@@ -137,15 +139,14 @@ const product = {
       if (error) throw error;
     }
   },
-  remove_admin: (req, res) => {
+  remove_product: (req, res) => {
     let { id } = req.body;
     if (!id) {
-      return res.status(400).json({ msg: "please enter admin id" });
+      return res.status(400).json({ msg: "please enter product id" });
     }
 
     data = xssFilter.inHTMLData(id);
 
-    console.log(id);
     Product.destroy({ where: { id } })
       .then((num) => {
         if (num == 1) {
@@ -189,6 +190,26 @@ const product = {
     } catch (error) {
       console.log(error);
     }
+  },
+  remove_category: (req, res) => {
+    let { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ msg: "please enter category id" });
+    }
+
+    data = xssFilter.inHTMLData(id);
+
+    Category.destroy({ where: { id } })
+      .then((num) => {
+        if (num == 1) {
+          res.send({ message: "deleted successfully" });
+        } else {
+          res.send("can't delete");
+        }
+      })
+      .catch((err) => {
+        res.status(404).send({ message: err });
+      });
   },
 };
 module.exports = product;
