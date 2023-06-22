@@ -8,13 +8,17 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV1,
       },
       amount: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
 
       status: {
-        type: DataTypes.BOOLEAN, //0 means not accepted 1 accepted
-        defaultValue: false,
+        type: DataTypes.ENUM("delivered", "processing", "canceled"),
+        defaultValue: "processing",
+      },
+      price: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
       },
     },
     {

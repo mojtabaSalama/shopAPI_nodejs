@@ -20,8 +20,9 @@ const user = {
       }
 
       //check requirements
-      if (phoneNum.length !== 10)
-        return res.status(400).json("wrong phone number");
+      // if (phoneNum.length != 10) {
+      //   return res.status(400).json("wrong phone number");
+      // }
 
       if (password.length < 6)
         return res.status(400).json(" pssword must be at least 6 charachters");
@@ -75,10 +76,12 @@ const user = {
         return res.status(400).json({ msg: "please enter all feilds" });
       }
 
-      //filter input
-      (phoneNum = xssFilter.inHTMLData(phoneNum)),
-        (password = xssFilter.inHTMLData(password));
-      deviceId = xssFilter.inHTMLData(deviceId);
+      //filter list
+      let data = [email, password];
+      //filtered data
+      data.map((data) => {
+        data = xssFilter.inHTMLData(data);
+      });
 
       User.findOne({ where: { email } }).then((user) => {
         if (!user) {
@@ -113,7 +116,7 @@ const user = {
     }
   },
   getbyid: async (req, res) => {
-    User.findOne({ where: { id: req.user.id } })
+    User.findOne({ where: { id: req.id } })
       .then((user) => {
         res.json({
           id: user.id,
@@ -181,8 +184,7 @@ const user = {
       if (fs.existsSync(filePath)) {
         //delete from fs system
         fs.unlink(filePath, (err) => {
-          if (err) console.log(err);
-          console.log("deleted from fs successfully");
+          return res.status(400).json("File is not saved");
         });
         //save the new link
         user.ImgLink = filename;
@@ -197,6 +199,25 @@ const user = {
       if (error) throw error;
     }
   },
+  // user_profile: async (req, res) => {
+  //   if (!req.body) {
+  //     return res.status(400).json("there is no input");
+  //   }
+  //   // let { id } = req.body;
+  //   // let newUser = user;
+  //   // let user = User.findOne({ where: { id } });
+  //   console.log(req.user);
+  //   // if ((newUser.id = id)) {
+  //   //   res.json({
+  //   //     id: user.id,
+  //   //     phoneNum: user.phoneNum,
+  //   //     email: user.email,
+  //   //     name: user.name,
+  //   //   });
+  //   // } else {
+  //   //   return res.status(400).json("unautherized");
+  //   // }
+  // },
 };
 
 module.exports = user;

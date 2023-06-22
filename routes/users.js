@@ -29,7 +29,9 @@ router.post(
   user.updateImage
 );
 
-router.get("/get-user", validAdmin, user.getbyid); //think about it
+router.get("/get-user", validAdmin, user.getbyid);
+//router.post("/profile", validUser, user.user_profile);
+
 //---------------------------
 
 module.exports = router;

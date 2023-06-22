@@ -7,7 +7,10 @@ require("dotenv").config();
 
 //connect to database
 (async () => {
-  await db.sequelize.sync({ alter: true });
+  await db.sequelize.sync(
+    // { alter: true }
+    { alter: true }
+  );
   console.log("Connected to MySQL");
 })();
 

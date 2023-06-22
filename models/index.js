@@ -42,8 +42,9 @@ product.belongsTo(admin);
 product_category.hasMany(product);
 // user and order
 user.hasMany(order);
-// order and product
-order.belongsTo(product);
+
+order.hasMany(product);
+product.belongsTo(order);
 
 // //-----------------------------------------------------
 
