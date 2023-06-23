@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const validUser = (req, res, next, role) => {
+const validUser = (req, res, next) => {
   let token = req.header("x-auth-token");
 
   if (!token) {
@@ -10,7 +10,8 @@ const validUser = (req, res, next, role) => {
 
   try {
     let decoded = jwt.verify(token, process.env.JWTSECRETUSER);
-    global.req.user = decoded;
+    req.user = decoded;
+    req.app.locals.user = decoded;
   } catch (error) {
     return res
       .status(400)

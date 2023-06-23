@@ -118,11 +118,13 @@ const user = {
   getbyid: async (req, res) => {
     User.findOne({ where: { id: req.id } })
       .then((user) => {
-        res.json({
-          id: user.id,
-          phoneNum: user.phoneNum,
-          email: user.email,
-          name: user.name,
+        sendJsonResponse(res, {
+          admin: {
+            id: user.id,
+            phoneNum: user.phoneNum,
+            email: user.email,
+            name: user.name,
+          },
         });
       })
       .catch((err) => console.log(err));
@@ -199,25 +201,25 @@ const user = {
       if (error) throw error;
     }
   },
-  // user_profile: async (req, res) => {
-  //   if (!req.body) {
-  //     return res.status(400).json("there is no input");
-  //   }
-  //   // let { id } = req.body;
-  //   // let newUser = user;
-  //   // let user = User.findOne({ where: { id } });
-  //   console.log(req.user);
-  //   // if ((newUser.id = id)) {
-  //   //   res.json({
-  //   //     id: user.id,
-  //   //     phoneNum: user.phoneNum,
-  //   //     email: user.email,
-  //   //     name: user.name,
-  //   //   });
-  //   // } else {
-  //   //   return res.status(400).json("unautherized");
-  //   // }
-  // },
+  user_profile: async (req, res) => {
+    if (!req.body) {
+      return res.status(400).json("there is no input");
+    }
+    let { id } = req.body;
+    let newUser = req.app.locals.user;
+    let user = User.findOne({ where: { id } });
+    console.log(req.user);
+    if ((newUser.id = id)) {
+      res.json({
+        id: user.id,
+        phoneNum: user.phoneNum,
+        email: user.email,
+        name: user.name,
+      });
+    } else {
+      return res.status(400).json("unautherized");
+    }
+  },
 };
 
 module.exports = user;

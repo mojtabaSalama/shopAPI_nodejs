@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const validAdmin = (req, res, next, role) => {
+const validAdmin = (req, res, next) => {
   let token = req.header("x-auth-token");
 
   if (!token) {
@@ -10,7 +10,8 @@ const validAdmin = (req, res, next, role) => {
 
   try {
     let decoded = jwt.verify(token, process.env.JWTSECRETADMIN);
-    decoded = req.user;
+    req.admin = decoded;
+    req.app.locals.admin = decoded;
   } catch (error) {
     return res
       .status(400)

@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     "order",
     {
       id: {
-        type: DataTypes.UUID,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV1,
       },

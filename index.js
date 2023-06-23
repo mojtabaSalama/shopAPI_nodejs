@@ -7,10 +7,10 @@ require("dotenv").config();
 
 //connect to database
 (async () => {
-  await db.sequelize.sync(
+  await db.sequelize
+    .sync
     // { alter: true }
-    { alter: true }
-  );
+    ();
   console.log("Connected to MySQL");
 })();
 
@@ -30,6 +30,7 @@ app.use("/user", require("./routes/users"));
 app.use("/admin", require("./routes/admin"));
 
 app.use("/product", require("./routes/product"));
+app.use("/order", require("./routes/order"));
 
 const Port = process.env.PORT || 4000;
 app.listen(Port, () => console.log(`server running on port ${Port}`));

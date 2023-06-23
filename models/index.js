@@ -43,8 +43,7 @@ product_category.hasMany(product);
 // user and order
 user.hasMany(order);
 
-order.hasMany(product);
-product.belongsTo(order);
+product.hasMany(order);
 
 // //-----------------------------------------------------
 

@@ -17,17 +17,17 @@ const admin = {
     try {
       let { name, phone, email, password, username, adminCountryId } = req.body;
 
-      //check req.body
-      if (!(name && phone && password && email && username && adminCountryId)) {
-        return res.status(400).json({ msg: "please enter all fields" });
-      }
+      // //check req.body
+      // if (!(name && phone && password && email && username && adminCountryId)) {
+      //   return res.status(400).json({ msg: "please enter all fields" });
+      // }
 
       // //check requirements
       // if (phone.length !== 10)
       //   return res.status(400).json("wrong phone number");
 
-      // if (password.length < 6)
-      //   return res.status(400).json("pssword must be at least 6 charachters");
+      if (password.length < 6)
+        return res.status(400).json("pssword must be at least 6 charachters");
 
       //-------------------------------------
 
