@@ -19,15 +19,13 @@ const user = {
         return res.status(400).json({ msg: " please enter all fields" });
       }
 
-      //check requirements
-      // if (phoneNum.length != 10) {
-      //   return res.status(400).json("wrong phone number");
-      // }
-
+      // check phone number
+      if (phoneNum.length != 10) {
+        return res.status(400).json("wrong phone number");
+      }
+      // check password
       if (password.length < 6)
         return res.status(400).json(" pssword must be at least 6 charachters");
-
-      //VERIFY PHONE WITH TWILIO --------------------------------------
 
       //-------------------------------------
 
@@ -71,7 +69,7 @@ const user = {
   login: async (req, res) => {
     try {
       let { email, password } = req.body;
-
+      // check fields
       if (!email || !password) {
         return res.status(400).json({ msg: "please enter all feilds" });
       }
@@ -83,6 +81,7 @@ const user = {
         data = xssFilter.inHTMLData(data);
       });
 
+      // be sure the user is exist
       User.findOne({ where: { email } }).then((user) => {
         if (!user) {
           return res.status(400).json({ msg: "user not found !" });
@@ -207,9 +206,8 @@ const user = {
     }
     let { id } = req.body;
     let newUser = req.app.locals.user;
-    let user = User.findOne({ where: { id } });
-    console.log(req.user);
-    if ((newUser.id = id)) {
+    let user = await User.findOne({ where: { id } });
+    if (newUser.id == user.id) {
       res.json({
         id: user.id,
         phoneNum: user.phoneNum,

@@ -15,16 +15,15 @@ require("dotenv").config();
 const admin = {
   add_admin: async (req, res) => {
     try {
-      let { name, phone, email, password, username, adminCountryId } = req.body;
+      let { name, phone, email, password, adminCountryId } = req.body;
 
-      // //check req.body
-      // if (!(name && phone && password && email && username && adminCountryId)) {
-      //   return res.status(400).json({ msg: "please enter all fields" });
-      // }
+      //check req.body
+      if (!(name && phone && password && email && adminCountryId)) {
+        return res.status(400).json({ msg: "please enter all fields" });
+      }
 
-      // //check requirements
-      // if (phone.length !== 10)
-      //   return res.status(400).json("wrong phone number");
+      //check phone number
+      if (phone.length != 10) return res.status(400).json("wrong phone number");
 
       if (password.length < 6)
         return res.status(400).json("pssword must be at least 6 charachters");
@@ -32,14 +31,14 @@ const admin = {
       //-------------------------------------
 
       //filter list
-      let data = [name, phone, email, password, username, adminCountryId];
+      let data = [name, phone, email, password, adminCountryId];
       //filtered data
       data.map((data) => {
         data = xssFilter.inHTMLData(data);
       });
 
       //make sure no admin is replicated
-      let admin = await Admin.findOne({ where: { username } });
+      let admin = await Admin.findOne({ where: { name } });
       if (admin) return res.status(403).json("user is already exist");
 
       //hash user password
@@ -51,7 +50,7 @@ const admin = {
         phone,
         email,
         password: hashedPassword,
-        username,
+
         adminCountryId,
       });
 
@@ -72,9 +71,9 @@ const admin = {
 
   login: async (req, res) => {
     try {
-      let { username, password } = req.body;
+      let { name, password } = req.body;
 
-      if (!username || !password) {
+      if (!name || !password) {
         return res.status(400).json({ msg: "please enter all feilds" });
       }
 
@@ -82,7 +81,8 @@ const admin = {
       (username = xssFilter.inHTMLData(username)),
         (password = xssFilter.inHTMLData(password));
 
-      Admin.findOne({ where: { username } }).then((admin) => {
+      // be sure admin is existed
+      Admin.findOne({ where: { name } }).then((admin) => {
         if (!admin) {
           return res.status(400).json({ msg: "user not found !" });
         }
@@ -134,16 +134,12 @@ const admin = {
   },
   update: async (req, res) => {
     try {
-      const { name, username, password, email, phone, adminCountryId, id } =
-        req.body;
+      const { name, password, email, phone, adminCountryId, id } = req.body;
       // check
-      if (
-        !(name && username && password && email && phone && adminCountryId, id)
-      )
+      if (!(name && password && email && phone && adminCountryId, id))
         return res.status(400).json("enter all feilds");
 
-      // if (phone.length !== 10)
-      //   return res.status(400).json("wrong phone number");
+      if (phone.length != 10) return res.status(400).json("wrong phone number");
       //hash user password
       const salt = await bcrypt.genSalt(10);
       hashedPassword = await bcrypt.hash(password, salt);
@@ -156,7 +152,6 @@ const admin = {
           email,
           phone,
           adminCountryId,
-          username,
         },
         { where: { id } }
       );
@@ -173,7 +168,7 @@ const admin = {
 
     data = xssFilter.inHTMLData(id);
 
-    console.log(id);
+    // console.log(id);
     Admin.destroy({ where: { id } })
       .then((num) => {
         if (num == 1) {

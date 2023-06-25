@@ -20,11 +20,6 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static("public"));
 
-// //main page
-// app.get("/", (req, res) => {
-//   res.sendFile(path.join(__dirname, "./public/index.html"));
-// });
-
 //setting up routes
 app.use("/user", require("./routes/users"));
 app.use("/admin", require("./routes/admin"));

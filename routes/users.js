@@ -30,7 +30,7 @@ router.post(
 );
 
 router.get("/get-user", validAdmin, user.getbyid);
-//router.post("/profile", validUser, user.user_profile);
+router.post("/profile", validUser, user.user_profile);
 
 //---------------------------
 

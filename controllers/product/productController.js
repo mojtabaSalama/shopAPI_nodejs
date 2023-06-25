@@ -13,7 +13,6 @@ const product = {
       let { filename } = req.file;
       let { price, name, productCategoryId, amount } = req.body;
 
-      // console.log(req.file);
       //check req.body
       if (!(price && name && productCategoryId && filename && amount)) {
         return res.status(400).json({ msg: " please enter all fields" });
@@ -43,7 +42,8 @@ const product = {
         );
         return res.status(400).json("File is not an image");
       }
-
+      // the admin who creates the product
+      let admin = req.app.locals.admin;
       //save to database
       const newProduct = await Product.create({
         name,
@@ -51,6 +51,7 @@ const product = {
         price,
         productCategoryId,
         amount,
+        adminId: admin,
       });
 
       //send to client
@@ -62,6 +63,7 @@ const product = {
           Image: newProduct.ImgLink,
           productCategoryId: newProduct.productCategoryId,
           amount: newProduct.amount,
+          created_by: newProduct.adminId,
         },
       });
     } catch (error) {
@@ -91,11 +93,9 @@ const product = {
       //check request
       if (!product_id) return res.status(400).json("add product id");
 
-      //check user
       const product = await Product.findOne({ where: { id: product_id } });
-      console.log(product);
 
-      //check if user already has an image
+      //check if product already has an image
       let filePath = path.join(
         __dirname,
         `../../public/images/${product.ImgLink}`
@@ -123,21 +123,24 @@ const product = {
   },
 
   updateProduct: async (req, res) => {
-    try {
-      const { name, price, productCategoryId, id, amount } = req.body;
-
-      // if (!(name && price && productCategoryId && id))
-      //   return res.status(400).json("enter all feilds");
-
-      //update User
-      let status = await Product.update(
-        { name, price, productCategoryId, amount },
-        { where: { id } }
-      );
-      res.send(`updated user successfully ${status}`);
-    } catch (error) {
-      if (error) throw error;
+    const { name, price, productCategoryId, id, amount } = req.body;
+    // check fields
+    if (!(name && price && productCategoryId && id & amount)) {
+      return await res.status(400).json("enter all feilds");
     }
+
+    //update product
+    Product.update(req.body, { where: { id } })
+      .then((num) => {
+        if (num == 1) {
+          res.send({ message: "updated successfully" });
+        } else {
+          res.send("cant update");
+        }
+      })
+      .catch((err) => {
+        res.status(404).send({ message: "error" });
+      });
   },
   remove_product: (req, res) => {
     let { id } = req.body;
@@ -170,7 +173,7 @@ const product = {
 
       data = xssFilter.inHTMLData(category);
 
-      //make sure no admin is replicated
+      //make sure no category is replicated
       let checkCategory = await Category.findOne({ where: { category } });
       if (checkCategory)
         return res.status(403).json("category is already exist");
