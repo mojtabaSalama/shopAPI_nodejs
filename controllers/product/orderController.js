@@ -7,42 +7,64 @@ const fs = require("fs");
 const path = require("path");
 const product = require("../../models/product");
 const Order = db.models.order;
+const Item = db.models.order_item;
 const Product = db.models.product;
 require("dotenv").config();
 const order = {
   // where the user can order products
   order: async (req, res) => {
     try {
-      let { product_id, amount } = req.body;
-      if (amount == 0) {
-        return res.status(400).json({ msg: " amount must not be 0" });
-      }
-      if (!(product_id && amount)) {
-        return res.status(400).json({ msg: " please enter all fields" });
-      }
-      let product = await Product.findOne({ where: { id: product_id } });
-      if (!product) {
-        return res.status(400).json("wrong id");
-      }
-      if (amount > product.amount) {
-        return res.status(400).json("the amount is more than available");
-      }
+      let { items } = req.body;
+      // check that its not empty
+      if (items.length == 0)
+        return res.status(400).json({ msg: " please enter a product" });
+      // total price is the sum of all Items prices
+      let totalprice = 0;
 
-      let price = amount * product.price;
+      // ensure the order is from the loged in user
       let user = req.app.locals.user;
 
+      // create order in database
       const newOrder = await Order.create({
-        productId: product_id,
-        price,
-        status: "processing",
-        amount,
-        userId: user.id,
-      });
-      product.amount = product.amount - amount;
-      await product.save();
+        price: totalprice,
 
-      res.json({
-        Order: newOrder,
+        userId: user.id,
+        status: "processing",
+      });
+      items.forEach(async (item) => {
+        // check info
+        if (amount == 0) {
+          return res.status(400).json({ msg: " amount must not be 0" });
+        }
+        if (!(product_id && amount)) {
+          return res.status(400).json({ msg: " please enter all fields" });
+        }
+        let product = await Product.findOne({ where: { id: product_id } });
+        if (!product) {
+          return res.status(400).json("wrong id");
+        }
+        if (amount > product.amount) {
+          return res.status(400).json("the amount is more than available");
+        }
+
+        // set total price of the item
+        let price = amount * product.price;
+
+        const newItem = await Item.create({
+          productId: product_id,
+          price,
+
+          amount,
+          orderId: newOrder.id,
+        });
+
+        // withdraw the item ordered
+        product.amount = product.amount - amount;
+        await product.save();
+        // set the price of all the order items
+        totalprice = +newItem.price;
+        newOrder.price = totalprice;
+        await newOrder.save();
       });
     } catch (error) {
       if (error) throw error;
@@ -74,10 +96,14 @@ const order = {
       } else {
         return res.status(400).json("did not canceled");
       }
-      // role back the ordered pruducts after canceling
-      let product = await Product.findOne({ where: { id: order.productId } });
-      product.amount = order.amount + product.amount;
-      await product.save();
+      // withdraw the ordered pruducts after canceling
+      items = await Item.findAll({ where: { orderId: order.id } });
+
+      items.forEach(async (item) => {
+        let product = await Product.findOne({ where: { id: item.productId } });
+        product.amount = item.amount + product.amount;
+        await product.save();
+      });
     } catch (error) {
       if (error) throw error;
     }
@@ -107,11 +133,15 @@ const order = {
         await order.save();
         // role back the products ordered after canceling
         if (status == "canceled") {
-          let product = await Product.findOne({
-            where: { id: order.productId },
+          items = await Item.findAll({ where: { orderId: order.id } });
+
+          items.forEach(async (item) => {
+            let product = await Product.findOne({
+              where: { id: item.productId },
+            });
+            product.amount = item.amount + product.amount;
+            await product.save();
           });
-          product.amount = order.amount + product.amount;
-          await product.save();
         }
         return res
           .status(200)

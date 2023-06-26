@@ -1,17 +1,17 @@
 module.exports = (sequelize, DataTypes) => {
-  const order = sequelize.define(
-    "order",
+  const order_item = sequelize.define(
+    "order_item",
     {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV1,
       },
-
-      status: {
-        type: DataTypes.ENUM("delivered", "processing", "canceled"),
-        defaultValue: "processing",
+      amount: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
       },
+
       price: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -22,5 +22,5 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  return order;
+  return order_item;
 };
