@@ -10,16 +10,16 @@ const xssFilter = require("xss-filters");
 const product = {
   create: async (req, res) => {
     try {
-      let { filename } = req.file;
+      // let { filename } = req.file;
       let { price, name, productCategoryId, amount } = req.body;
 
       //check req.body
-      if (!(price && name && productCategoryId && filename && amount)) {
+      if (!(price && name && productCategoryId && amount)) {
         return res.status(400).json({ msg: " please enter all fields" });
       }
 
       //filter list
-      let data = [price, name, productCategoryId, filename, amount];
+      let data = [price, name, productCategoryId, amount];
       //filtered data
       data.map((data) => {
         data = xssFilter.inHTMLData(data);
@@ -29,29 +29,30 @@ const product = {
       let product = await Product.findOne({ where: { name } });
       if (product) return res.status(403).json("The product is already exist");
 
-      // check if file is an image
-      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+      // // check if file is an image
+      // const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
 
-      if (!allowedTypes.includes(req.file.mimetype)) {
-        fs.unlink(
-          path.join(__dirname, `../../public/images/${filename}`),
-          (err) => {
-            if (err) throw err;
-            console.log("deleted type is not image");
-          }
-        );
-        return res.status(400).json("File is not an image");
-      }
+      // if (!allowedTypes.includes(req.file.mimetype)) {
+      //   fs.unlink(
+      //     path.join(__dirname, `../../public/images/${filename}`),
+      //     (err) => {
+      //       if (err) throw err;
+      //       console.log("deleted type is not image");
+      //     }
+      //   );
+      //   return res.status(400).json("File is not an image");
+      // }
+
       // the admin who creates the product
       let admin = req.app.locals.admin;
       //save to database
       const newProduct = await Product.create({
         name,
-        ImgLink: filename,
+        ImgLink: null,
         price,
         productCategoryId,
         amount,
-        adminId: admin,
+        adminId: admin.id,
       });
 
       //send to client

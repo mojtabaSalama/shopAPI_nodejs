@@ -78,7 +78,7 @@ const admin = {
       }
 
       //filter input
-      (username = xssFilter.inHTMLData(username)),
+      (name = xssFilter.inHTMLData(name)),
         (password = xssFilter.inHTMLData(password));
 
       // be sure admin is existed

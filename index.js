@@ -3,14 +3,15 @@ const app = express();
 const path = require("path");
 const cors = require("cors");
 const db = require("./models/index");
+const bodyParser = require("body-parser");
 require("dotenv").config();
 
 //connect to database
 (async () => {
-  await db.sequelize.sync(
+  await db.sequelize
+    .sync
     // { alter: true }
-    { alter: true }
-  );
+    ();
   console.log("Connected to MySQL");
 })();
 
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
 app.use(express.static("public"));
+app.use(bodyParser.json());
 
 //setting up routes
 app.use("/user", require("./routes/users"));

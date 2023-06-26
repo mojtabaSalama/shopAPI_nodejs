@@ -9,15 +9,21 @@ const product = require("../../models/product");
 const Order = db.models.order;
 const Item = db.models.order_item;
 const Product = db.models.product;
+
 require("dotenv").config();
 const order = {
   // where the user can order products
   order: async (req, res) => {
     try {
-      let { items } = req.body;
-      // check that its not empty
-      if (items.length == 0)
-        return res.status(400).json({ msg: " please enter a product" });
+      const { items } = req.body;
+      // console.log(items);
+
+      // check items is an array
+      if (!Array.isArray(items)) {
+        return res
+          .status(400)
+          .json({ msg: "Invalid request format: items should be an array" });
+      }
       // total price is the sum of all Items prices
       let totalprice = 0;
 
@@ -31,7 +37,11 @@ const order = {
         userId: user.id,
         status: "processing",
       });
-      items.forEach(async (item) => {
+
+      let prevItemName = null;
+      for (const item of items) {
+        let amount = item.amount;
+        let product_id = item.id;
         // check info
         if (amount == 0) {
           return res.status(400).json({ msg: " amount must not be 0" });
@@ -40,9 +50,17 @@ const order = {
           return res.status(400).json({ msg: " please enter all fields" });
         }
         let product = await Product.findOne({ where: { id: product_id } });
+        console.log(product);
         if (!product) {
           return res.status(400).json("wrong id");
         }
+        // check if product is not ordered twice or more
+        if (prevItemName == product.name)
+          return res
+            .status(400)
+            .json("you ordered the same product more than one time  ");
+
+        // check amount is available
         if (amount > product.amount) {
           return res.status(400).json("the amount is more than available");
         }
@@ -62,9 +80,17 @@ const order = {
         product.amount = product.amount - amount;
         await product.save();
         // set the price of all the order items
-        totalprice = +newItem.price;
-        newOrder.price = totalprice;
-        await newOrder.save();
+        totalprice = totalprice + newItem.price;
+
+        // puts the item name in prevItemName to compare it with the next item
+        prevItemName = product.name;
+      }
+      newOrder.price = parseFloat(totalprice);
+      await newOrder.save();
+      savedItems = await Item.findAll({ where: { orderId: newOrder.id } });
+
+      res.json({
+        items_ordered: savedItems,
       });
     } catch (error) {
       if (error) throw error;
@@ -99,11 +125,11 @@ const order = {
       // withdraw the ordered pruducts after canceling
       items = await Item.findAll({ where: { orderId: order.id } });
 
-      items.forEach(async (item) => {
+      for (const item of items) {
         let product = await Product.findOne({ where: { id: item.productId } });
         product.amount = item.amount + product.amount;
         await product.save();
-      });
+      }
     } catch (error) {
       if (error) throw error;
     }
