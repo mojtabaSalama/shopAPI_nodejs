@@ -9,7 +9,6 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
 
-const { log } = require("console");
 require("dotenv").config();
 
 const admin = {
@@ -84,7 +83,7 @@ const admin = {
       // be sure admin is existed
       Admin.findOne({ where: { name } }).then((admin) => {
         if (!admin) {
-          return res.status(400).json({ msg: "user not found !" });
+          return res.status(400).json({ msg: "admin not found !" });
         }
 
         //password auth
@@ -130,7 +129,7 @@ const admin = {
           admin,
         });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => res.status(400).json("there is no admin with id given"));
   },
   update: async (req, res) => {
     try {
@@ -140,6 +139,10 @@ const admin = {
         return res.status(400).json("enter all feilds");
 
       if (phone.length != 10) return res.status(400).json("wrong phone number");
+
+      const admin = await Admin.findOne({ where: { id } });
+      if (!admin)
+        return res.status(400).json("there is no admin with id given");
       //hash user password
       const salt = await bcrypt.genSalt(10);
       hashedPassword = await bcrypt.hash(password, salt);
@@ -160,13 +163,15 @@ const admin = {
       if (error) throw error;
     }
   },
-  remove_admin: (req, res) => {
+  remove_admin: async (req, res) => {
     let { id } = req.body;
     if (!id) {
       return res.status(400).json({ msg: "please enter admin id" });
     }
 
     data = xssFilter.inHTMLData(id);
+    const admin = await Admin.findOne({ where: { id } });
+    if (!admin) return res.status(400).json("there is no admin with id given");
 
     // console.log(id);
     Admin.destroy({ where: { id } })
@@ -211,13 +216,16 @@ const admin = {
       console.log(error);
     }
   },
-  remove_country: (req, res) => {
+  remove_country: async (req, res) => {
     let { id } = req.body;
     if (!id) {
       return res.status(400).json({ msg: "please enter country id" });
     }
 
     data = xssFilter.inHTMLData(id);
+    const country = await Country.findOne({ where: { id } });
+    if (!country)
+      return res.status(400).json("there is no country with id given");
 
     Country.destroy({ where: { id } })
       .then((num) => {
@@ -231,13 +239,15 @@ const admin = {
         res.status(404).send({ message: err });
       });
   },
-  remove_user: (req, res) => {
+  remove_user: async (req, res) => {
     let { id } = req.body;
     if (!id) {
       return res.status(400).json({ msg: "please enter user id" });
     }
 
     data = xssFilter.inHTMLData(id);
+    const user = await USER.findOne({ where: { id } });
+    if (!user) return res.status(400).json("there is no user with id given");
 
     USER.destroy({ where: { id } })
       .then((num) => {

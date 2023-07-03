@@ -16,7 +16,6 @@ const order = {
   order: async (req, res) => {
     try {
       const { items } = req.body;
-      // console.log(items);
 
       // check items is an array
       if (!Array.isArray(items)) {
@@ -101,14 +100,17 @@ const order = {
     try {
       let { id, status } = req.body;
 
-      console.log(status);
-
       // check fields
       if (!(status && id)) return res.status(400).json("enter all feilds");
 
       //check if the user who made the order is the one who makes the changes
       let user = req.app.locals.user;
       let order = await Order.findOne({ where: { id } });
+      if (!order) {
+        return res
+          .status(400)
+          .json("there is no order , please enter correct id");
+      }
       if (order.userId != user.id) {
         return res.status(400).json(" user");
       }
@@ -123,7 +125,7 @@ const order = {
         return res.status(400).json("did not canceled");
       }
       // withdraw the ordered pruducts after canceling
-      items = await Item.findAll({ where: { orderId: order.id } });
+      let items = await Item.findAll({ where: { orderId: order.id } });
 
       for (const item of items) {
         let product = await Product.findOne({ where: { id: item.productId } });
@@ -146,6 +148,11 @@ const order = {
       // also because the status is changed from proccessing it can not be proccessing
       // the status in the input can not be the same as the status in the database
       const order = await Order.findOne({ where: { id } });
+      if (!order) {
+        return res
+          .status(400)
+          .json("there is no order , please enter correct id");
+      }
       if (
         status == "processing" &&
         (status != "canceled" || status != "delivered") &&
@@ -159,7 +166,7 @@ const order = {
         await order.save();
         // role back the products ordered after canceling
         if (status == "canceled") {
-          items = await Item.findAll({ where: { orderId: order.id } });
+          let items = await Item.findAll({ where: { orderId: order.id } });
 
           items.forEach(async (item) => {
             let product = await Product.findOne({

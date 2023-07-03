@@ -115,25 +115,32 @@ const user = {
     }
   },
   getbyid: async (req, res) => {
-    User.findOne({ where: { id: req.id } })
-      .then((user) => {
-        sendJsonResponse(res, {
-          admin: {
-            id: user.id,
-            phoneNum: user.phoneNum,
-            email: user.email,
-            name: user.name,
-          },
-        });
-      })
-      .catch((err) => console.log(err));
+    try {
+      let user = User.findOne({ where: { id: req.id } });
+      if (!user) return res.status(400).json("wrong id");
+
+      res.json({
+        admin: {
+          id: user.id,
+          phoneNum: user.phoneNum,
+          email: user.email,
+          name: user.name,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(400).json("something happened");
+    }
   },
   update: async (req, res) => {
     try {
-      const { name, password, email, phoneNum } = req.body;
+      const { name, password, email, phoneNum, id } = req.body;
       // check
-      if (!(name && password && email && phoneNum))
+      if (!(name && password && email && phoneNum && id))
         return res.status(400).json("enter all feilds");
+
+      let user = User.findOne({ where: { id } });
+      if (!user) return res.status(400).json("wrong id");
 
       if (phoneNum.length !== 10)
         return res.status(400).json("wrong phone number");
@@ -141,12 +148,17 @@ const user = {
       const salt = await bcrypt.genSalt(10);
       hashedPassword = await bcrypt.hash(password, salt);
 
-      //update User
-      let status = await User.update(
-        { name, password: hashedPassword, email, phoneNum },
-        { where: { id } }
-      );
-      res.send(`updated user successfully ${status}`);
+      let userAuth = req.app.locals.user;
+      if (userAuth != user.id) {
+        return res.status(403).json("unautherized user");
+      } else {
+        //update User
+        let status = await User.update(
+          { name, password: hashedPassword, email, phoneNum },
+          { where: { id } }
+        );
+        res.send(`updated user successfully ${status}`);
+      }
     } catch (error) {
       if (error) throw error;
     }
@@ -155,6 +167,12 @@ const user = {
     try {
       let { filename } = req.file;
       let { id } = req.body;
+      //check request
+      if (!id) return res.status(400).json("add your id");
+
+      //check user
+      const user = await User.findOne({ where: { id } });
+      if (!user) return res.status(400).json("wrong id");
 
       // check if file is an image
       const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
@@ -169,32 +187,30 @@ const user = {
         );
         return res.status(400).json("File is not an image");
       }
-
-      //check request
-      if (!id) return res.status(400).json("add your id");
-
-      //check user
-      const user = await User.findOne({ where: { id } });
-
-      //check if user already has an image
-      let filePath = path.join(
-        __dirname,
-        `../../public/images/${user.ImgLink}`
-      );
-
-      if (fs.existsSync(filePath)) {
-        //delete from fs system
-        fs.unlink(filePath, (err) => {
-          return res.status(400).json("File is not saved");
-        });
-        //save the new link
-        user.ImgLink = filename;
-        await user.save();
-        res.json({ user });
+      let userAuth = req.app.locals.user;
+      if (userAuth != user.id) {
+        return res.status(403).json("unautherized user");
       } else {
-        user.ImgLink = filename;
-        await user.save();
-        res.json({ user });
+        //check if user already has an image
+        let filePath = path.join(
+          __dirname,
+          `../../public/images/${user.ImgLink}`
+        );
+
+        if (fs.existsSync(filePath)) {
+          //delete from fs system
+          fs.unlink(filePath, (err) => {
+            return res.status(400).json("File is not saved");
+          });
+          //save the new link
+          user.ImgLink = filename;
+          await user.save();
+          res.json({ user });
+        } else {
+          user.ImgLink = filename;
+          await user.save();
+          res.json({ user });
+        }
       }
     } catch (error) {
       if (error) throw error;

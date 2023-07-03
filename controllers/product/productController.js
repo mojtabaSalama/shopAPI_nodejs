@@ -10,45 +10,45 @@ const xssFilter = require("xss-filters");
 const product = {
   create: async (req, res) => {
     try {
-      // let { filename } = req.file;
+      let { filename } = req.file;
       let { price, name, productCategoryId, amount } = req.body;
 
       //check req.body
-      if (!(price && name && productCategoryId && amount)) {
+      if (!(price && name && productCategoryId && amount && filename)) {
         return res.status(400).json({ msg: " please enter all fields" });
       }
 
       //filter list
-      let data = [price, name, productCategoryId, amount];
+      let data = [price, name, productCategoryId, amount, filename];
       //filtered data
       data.map((data) => {
         data = xssFilter.inHTMLData(data);
       });
 
-      //make sure no admin is replicated
+      //make sure no product is replicated
       let product = await Product.findOne({ where: { name } });
       if (product) return res.status(403).json("The product is already exist");
 
-      // // check if file is an image
-      // const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+      // check if file is an image
+      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
 
-      // if (!allowedTypes.includes(req.file.mimetype)) {
-      //   fs.unlink(
-      //     path.join(__dirname, `../../public/images/${filename}`),
-      //     (err) => {
-      //       if (err) throw err;
-      //       console.log("deleted type is not image");
-      //     }
-      //   );
-      //   return res.status(400).json("File is not an image");
-      // }
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        fs.unlink(
+          path.join(__dirname, `../../public/images/${filename}`),
+          (err) => {
+            if (err) throw err;
+            console.log("deleted type is not image");
+          }
+        );
+        return res.status(400).json("File is not an image");
+      }
 
       // the admin who creates the product
       let admin = req.app.locals.admin;
       //save to database
       const newProduct = await Product.create({
         name,
-        ImgLink: null,
+        ImgLink: filename,
         price,
         productCategoryId,
         amount,
@@ -75,7 +75,10 @@ const product = {
     try {
       let { filename } = req.file;
       let { product_id } = req.body;
-      console.log(req.file);
+
+      const product = await Product.findOne({ where: { id: product_id } });
+      if (!product)
+        return res.status(400).json("there is no product with id given");
 
       // check if file is an image]
       const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
@@ -93,8 +96,6 @@ const product = {
 
       //check request
       if (!product_id) return res.status(400).json("add product id");
-
-      const product = await Product.findOne({ where: { id: product_id } });
 
       //check if product already has an image
       let filePath = path.join(
@@ -129,6 +130,9 @@ const product = {
     if (!(name && price && productCategoryId && id & amount)) {
       return await res.status(400).json("enter all feilds");
     }
+    const product = await Product.findOne({ where: { id } });
+    if (!product)
+      return res.status(400).json("there is no product with id given");
 
     //update product
     Product.update(req.body, { where: { id } })
@@ -143,11 +147,14 @@ const product = {
         res.status(404).send({ message: "error" });
       });
   },
-  remove_product: (req, res) => {
+  remove_product: async (req, res) => {
     let { id } = req.body;
     if (!id) {
       return res.status(400).json({ msg: "please enter product id" });
     }
+    const product = await Product.findOne({ where: { id } });
+    if (!product)
+      return res.status(400).json("there is no product with id given");
 
     data = xssFilter.inHTMLData(id);
 
@@ -195,12 +202,15 @@ const product = {
       console.log(error);
     }
   },
-  remove_category: (req, res) => {
+  remove_category: async (req, res) => {
     let { id } = req.body;
     if (!id) {
       return res.status(400).json({ msg: "please enter category id" });
     }
 
+    const category = await Category.findOne({ where: { id } });
+    if (!category)
+      return res.status(400).json("there is no category with id given");
     data = xssFilter.inHTMLData(id);
 
     Category.destroy({ where: { id } })
