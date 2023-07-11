@@ -1,11 +1,5 @@
 const db = require("../../models/index");
-const USER = db.models.user;
-const Admin = db.models.admin;
-const xssFilter = require("xss-filters");
 
-const fs = require("fs");
-const path = require("path");
-const product = require("../../models/product");
 const Order = db.models.order;
 const Item = db.models.order_item;
 const Product = db.models.product;

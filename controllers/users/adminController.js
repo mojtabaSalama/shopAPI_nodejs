@@ -6,8 +6,6 @@ const Country = db.models.admin_country;
 const bcrypt = require("bcryptjs");
 const xssFilter = require("xss-filters");
 const jwt = require("jsonwebtoken");
-const fs = require("fs");
-const path = require("path");
 
 require("dotenv").config();
 
