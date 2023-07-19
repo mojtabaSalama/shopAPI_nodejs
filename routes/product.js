@@ -22,4 +22,6 @@ router.post("/update", validAdmin, product.updateProduct);
 router.post("/remove_product", validAdmin, product.remove_product);
 router.post("/remove_category", validAdmin, product.remove_category);
 
+router.get("/all", product.allProducts);
+
 module.exports = router;

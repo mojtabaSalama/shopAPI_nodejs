@@ -225,5 +225,10 @@ const product = {
         res.status(404).send({ message: err });
       });
   },
+  allProducts: async (req, res) => {
+    const products = await Product.findAll();
+
+    res.json({ products });
+  },
 };
 module.exports = product;
